@@ -117,8 +117,8 @@ int fonctionExecute(const string& p_commande, DisqueVirtuel *p_disqueVirtuel){
 						break;
 					case 1: cout << (*p_disqueVirtuel).bd_ls(v_splitCommande[1]);
 						break;
-					case 2: retour = (*p_disqueVirtuel).bd_rm(v_splitCommande[1]);
-						break;
+					//case 2: retour = (*p_disqueVirtuel).bd_rm(v_splitCommande[1]);
+					//	break;
 					case 3: retour = (*p_disqueVirtuel).bd_create(v_splitCommande[1]);
 						break;
 					case 4: retour = (*p_disqueVirtuel).bd_FormatDisk();

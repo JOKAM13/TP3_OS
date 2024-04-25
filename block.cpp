@@ -14,10 +14,24 @@
 
 namespace TP3
 {
-	// Ajouter votre code ici !
+	// IMPLEMENTATION DU CONSTRUCTEUR PAR DEFAUT
+	Block::Block(){
+
+	}
+	// IMPLEMENTATION DU CONstructeur avec parametre
+	Block::Block(size_t typeData ){
+		m_type_donnees = typeData;
+	}
+	// IMPLEMENTATION DU destructeur
+
+	Block::~Block(){
+		for(auto val: m_dirEntry){
+			delete val;
+		}
+	}
 }
 
-}//Fin du namespace
+//Fin du namespace
 
 
 

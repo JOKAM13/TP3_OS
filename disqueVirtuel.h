@@ -35,14 +35,18 @@ public:
 	int bd_mkdir(const std::string& p_DirName);
 	int bd_create(const std::string& p_FileName);
 	int bd_rm(const std::string& p_Filename);
+	std::pair<std::string, std::string>getFichierDossier(const std::string &Filename);
+	bool RepertoireEstExistant(const std::string &nomRepertoireame);
 
 	// Vous pouvez ajouter ici d'autres méthodes publiques
 
 private:
 	// Il est interdit de modifier ce modèle d'implémentation (i.e le type de m_blockDisque)!
     std::vector<Block> m_blockDisque; // Un vecteur de blocs représentant le disque virtuel
+	iNode* m_InodeRacine; 
+	iNode* m_InodeParent; 
 
-    // Vous pouvez ajouter ici des méthodes privées
+   
 };
 
 }//Fin du namespace
