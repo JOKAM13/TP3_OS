@@ -10,12 +10,14 @@
  */
 
 #include "disqueVirtuel.h"
-#include <iostream>
 #include <string>
 #include <iostream>
 #include <sstream>
 #include <fstream>
-//vous pouvez inclure d'autres librairies si c'est nécessaire
+#include <string>
+#include <ostream>
+#include <vector>
+#include <algorithm>
 
 namespace TP3
 {
@@ -270,5 +272,92 @@ namespace TP3
 			std::string NomDossier = CheminDossier.substr(positionDossier + 1);
 		return {NomDossier, NomFichier};
 		}
+
+
+
+	int DisqueVirtuel::bd_rm(const std::string &p_Filename) {
+	    int success = 0;
+
+	    std::string directoryName = p_Filename.substr(p_Filename.find_last_of("/") + 1);
+	    bool elementFound = false;
+	    dirEntry* removalDirEntry;
+	    int m_sourceINodeNumber;
+
+	    // Recherche de l element
+	    for (int i = N_INODE_ON_DISK + BASE_BLOCK_INODE; i < N_BLOCK_ON_DISK; i++) {
+		for (auto& entry : m_blockDisque[i].m_dirEntry) {
+		    if (entry->m_filename.compare(directoryName) == 0) {
+		        int inodeNumber = entry->m_iNode;
+		        m_InodeRacine = m_blockDisque[inodeNumber + BASE_BLOCK_INODE].m_inode;
+		        removalDirEntry = entry;
+		        m_sourceINodeNumber = m_blockDisque[i].m_dirEntry[0]->m_iNode;
+		        elementFound = true;
+		        break;
+		    }
+		}
+		if (elementFound) break;
+	    }
+
+	    if (!elementFound) return success;
+
+	    // Verifier le type et supprimer l element
+	    if (m_InodeRacine->st_mode == S_IFDIR) {
+
+		Block& directory = m_blockDisque[m_InodeRacine->st_block];
+		bool isEmpty = true;
+		if (directory.m_dirEntry.size() == 2) {
+		    for (auto& dirEntry : directory.m_dirEntry) {
+		        if (dirEntry->m_filename != "." && dirEntry->m_filename != "..") {
+		            isEmpty = false;
+		            break;
+		        }
+		    }
+		} else {
+		    isEmpty = false;
+		}
+
+		if (isEmpty) {
+		    m_InodeRacine->st_nlink--;
+		    if (m_InodeRacine->st_nlink == 1) {
+		        m_blockDisque[FREE_BLOCK_BITMAP].m_bitmap[m_InodeRacine->st_block] = true;
+		        m_blockDisque[FREE_INODE_BITMAP].m_bitmap[m_InodeRacine->st_ino] = true;
+		
+			std::cout << "UFS: Relache i-node " << m_InodeRacine->st_ino << std::endl;
+			std::cout << "UFS: Relache bloc " << m_InodeRacine->st_block << std::endl;
+		
+
+		        auto& directory = m_blockDisque[m_sourceINodeNumber + BASE_BLOCK_INODE].m_inode->st_block;
+		        auto& dirEntries = m_blockDisque[directory].m_dirEntry;
+		        dirEntries.erase(std::remove(dirEntries.begin(), dirEntries.end(), removalDirEntry), dirEntries.end());
+
+		        iNode* sourceINode = m_blockDisque[m_sourceINodeNumber + BASE_BLOCK_INODE].m_inode;
+		        sourceINode->st_nlink--;
+		        sourceINode->st_size -= 28;
+		    }
+		    success = 1;
+		}
+	    } else if (m_InodeRacine->st_mode == S_IFREG) {
+		m_InodeRacine->st_nlink--;
+		if (m_InodeRacine->st_nlink == 0) {
+		    m_blockDisque[FREE_BLOCK_BITMAP].m_bitmap[m_InodeRacine->st_block] = true;
+		    m_blockDisque[FREE_INODE_BITMAP].m_bitmap[m_InodeRacine->st_ino] = true;
+		    std::cout << "UFS: Relache i-node " << m_InodeRacine->st_ino << std::endl;
+
+		    auto& directory = m_blockDisque[m_sourceINodeNumber + BASE_BLOCK_INODE].m_inode->st_block;
+		    auto& dirEntries = m_blockDisque[directory].m_dirEntry;
+		    dirEntries.erase(std::remove(dirEntries.begin(), dirEntries.end(), removalDirEntry), dirEntries.end());
+
+		    iNode* sourceINode = m_blockDisque[m_sourceINodeNumber + BASE_BLOCK_INODE].m_inode;
+		    sourceINode->st_size -= 28;
+		}
+		success = 1;
+	    }
+
+	    return success;
+	}
+
+
+
+
 
 }//Fin du namespace
