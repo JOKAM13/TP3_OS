@@ -37,6 +37,9 @@ public:
 	int bd_rm(const std::string& p_Filename);
 	std::pair<std::string, std::string>getFichierDossier(const std::string &Filename);
 	bool RepertoireEstExistant(const std::string &nomRepertoireame);
+	int trouverPremierINodeLibre(); // methode pour trouver le premier Inode libre
+	int trouverPremierBlocLibre();// methode pour trouver le premier bloc libre
+	void creationDuRepertoire(iNode* inodeParent, const std::string &nomFichier, int numeroInodeLibre, int numeroBlocLibre); // fonction pour la creation du fichier
 
 	// Vous pouvez ajouter ici d'autres méthodes publiques
 
@@ -44,9 +47,6 @@ private:
 	// Il est interdit de modifier ce modèle d'implémentation (i.e le type de m_blockDisque)!
     std::vector<Block> m_blockDisque; // Un vecteur de blocs représentant le disque virtuel
 	iNode* m_InodeRacine; 
-	iNode* m_InodeParent; 
-
-   
 };
 
 }//Fin du namespace
