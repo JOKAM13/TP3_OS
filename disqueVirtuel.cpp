@@ -24,13 +24,17 @@ namespace TP3
 	// implementation du constructeur
 	DisqueVirtuel::DisqueVirtuel(){
 		bd_FormatDisk();
+		Connexion.open("Connectedfile.txt", std::ios::out | std::ios::app);
 	}
+
+std::ofstream Connexion;
 
 	// implementation du destructeur
 	DisqueVirtuel::~DisqueVirtuel(){
 		for(int index = BASE_BLOCK_INODE; index < 24 ;index++){
 			delete m_blockDisque[index].m_inode;
 		}
+		Connexion.close();
 	}
 
 	//creation de la premiere fonction
@@ -106,7 +110,8 @@ namespace TP3
 			std::cerr << "Erreur: " << e.what() <<std::endl;
 			return 0;
 		}
-
+        // Partie Journal
+        journal("Enregistrement de modification /Suppression faite ici");
 		return 1; 
 	}
 
@@ -131,6 +136,10 @@ namespace TP3
 			 int InodePere = m_blockDisque[m_InodeRacine->st_block].m_dirEntry[0]->m_iNode;
              auto monInode =  m_blockDisque[InodePere + BASE_BLOCK_INODE].m_inode;
 			 monInode->st_size += 28;
+
+			 // Partie Journal
+			j
+
 			 return 1;
 		}
 		return 0;
@@ -154,6 +163,8 @@ namespace TP3
 			int indexIBlockLibre = trouverPremierBlocLibre();
 			//je recherche l,index de libre enfet
 			creationDuRepertoire(m_InodeRacine, nomFichier,indexInodeLibre,indexIBlockLibre);
+			// Partie Journal
+			journal("Répertoire/ Create ", p_DirName );
 			return 1;
         }
 
@@ -357,6 +368,28 @@ namespace TP3
 	}
 
 
+std::string DisqueVirtuel::PriseInformation() {
+	// On prend le temps de login ici
+    time_t temps = time(0);
+
+    struct tm tstruct;
+    char buffer1[80];
+    tstruct = *localtime(&temps);
+    strftime(buffer1, sizeof(buffer1), "%Y-%m-%d %X", &tstruct);
+    return buffer1;
+}
+
+// Partie du programme qui enregistre les entrées 
+		void DisqueVirtuel::journal(const std::string& Manip, const std::string& Contenue) {
+
+            LogEntry entry;
+            entry.operation = Manip;
+            entry.details = Contenue;
+            entry.timestamp = PriseInformation();
+
+            // Écrire l'entrée du journal dans un fichier ou toute autre destination
+            Connexion << entry.timestamp << " - " << entry.operation << ": " << entry.details << std::endl;
+        }
 
 
 

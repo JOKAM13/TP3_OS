@@ -42,7 +42,11 @@ public:
 	void creationDuRepertoire(iNode* inodeParent, const std::string &nomFichier, int numeroInodeLibre, int numeroBlocLibre); // fonction pour la creation du fichier
 
 	// Vous pouvez ajouter ici d'autres méthodes publiques
-
+	
+// Sorte de buffer pour récupérer les données
+	std::string PriseInformation();
+	//Méthode pour l'affichage de la journalisation 
+    void journal(const std::string& Manip, const std::string& Contenue);
 private:
 	// Il est interdit de modifier ce modèle d'implémentation (i.e le type de m_blockDisque)!
     std::vector<Block> m_blockDisque; // Un vecteur de blocs représentant le disque virtuel
